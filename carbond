@@ -1,0 +1,182 @@
+#!/bin/bash
+
+# Provides a simple interface for Consul-Vault
+CONSUL_IP=$(cat /etc/environment | grep DOCKER_HOST_IP | cut -d "=" -f2)
+CONSUL_PORT=8500
+CONSUL_API_VERSION=v1
+CONSUL_KV_API=kv
+cfg_parser (){
+    IFS=$'\n' && ini=( $(<$1) ) # convert to line-array
+    ini=( ${ini[*]//;*/} )      # remove comments ;
+    ini=( ${ini[*]//\#*/} )     # remove comments #
+    ini=( ${ini[*]/\	=/=} )  # remove tabs before =
+    ini=( ${ini[*]/=\	/=} )   # remove tabs be =
+    ini=( ${ini[*]/\ =\ /=} )   # remove anything with a space around  = 
+    ini=( ${ini[*]/#[/\}$'\n'cfg.section.} ) # set section prefix
+    ini=( ${ini[*]/%]/ \(} )    # convert text2function (1)
+    ini=( ${ini[*]/=/=\( } )    # convert item to array
+    ini=( ${ini[*]/%/ \)} )     # close array parenthesis
+    ini=( ${ini[*]/%\\ \)/ \\} ) # the multiline trick
+    ini=( ${ini[*]/%\( \)/\(\) \{} ) # convert text2function (2)
+    ini=( ${ini[*]/%\} \)/\}} ) # remove extra parenthesis
+    ini[0]="" # remove first element
+    ini[${#ini[*]} + 1]='}'    # add the last brace
+    eval "$(echo "${ini[*]}")" # eval the result
+}
+
+disable_stack(){
+	sudo systemctl disable carbondale@1 > /dev/null 2>&1
+}
+
+setup_stack(){
+	sudo /bin/cp /workspace/carbondale/src/carbondale@1.service /etc/systemd/system/
+	sudo systemctl daemon-reload
+}
+
+start_stack(){
+	setup_stack
+	printf "Starting Carbondale...\n"
+	sudo systemctl enable carbondale@1 > /dev/null 2>&1
+	sudo systemctl start carbondale@1
+}
+
+stop_stack(){
+	echo "Stopping Carbondale...\n"
+	sudo systemctl stop carbondale@1
+}
+
+restart_stack(){
+	echo "Restarting Carbondale...\n"
+	sudo systemctl restart carbondale@1
+}
+
+init_vault(){
+    VAULT_REPO=/workspace/carbondale/src/vault
+    /bin/sh -c \
+    "cd ${VAULT_REPO} \
+    && ./setup_vault.sh"
+}
+
+validate_vault(){
+    CONSUL_HEALTH_API=health/state/passing
+    curl -s http://${CONSUL_IP}:${CONSUL_PORT}/${CONSUL_API_VERSION}/${CONSUL_HEALTH_API} > /dev/null 2>&1
+    if [ "$?" -eq 0 ];then
+    	printf 'Vault is unsealed and healthy!\n\n'
+    else
+    	printf 'Vault is not unsealed.\n\n' 
+        exit 1
+    fi
+}
+setup_aws(){
+    AWS_USERNAME=$(aws iam get-user|jq -r '.User.UserName')
+    CREDENTIALS=${CREDENTIALS:-~/.aws/credentials}
+    PROFILE=${PROFILE:-default}
+
+    validate_vault
+    if [[ ! -r "${CREDENTIALS}" ]]; then
+        echo "File not found: '${CREDENTIALS}'"
+        exit 1
+    fi
+    
+    cfg_parser "${CREDENTIALS}"
+    if [[ $? -ne 0 ]]; then
+        echo "Parsing credentials file '${CREDENTIALS}' failed"
+        exit 1
+    fi
+
+    cfg.section.${PROFILE}
+    if [[ $? -ne 0 ]]; then
+        echo "Profile '${PROFILE}' not found"
+        exit 1
+    fi
+    
+    vault write secret/aws/aws_username aws_username=${AWS_USERNAME} > /dev/null 2>&1
+    printf '%s\n\n' 'Success! AWS username was saved to Vault'
+
+    vault write secret/aws/aws_access_key aws_access_key=${aws_access_key_id} > /dev/null 2>&1
+    printf '%s\n\n' 'Success! AWS access key was saved to Vault'
+
+    vault write secret/aws/aws_secret_key aws_secret_key=${aws_secret_access_key} > /dev/null 2>&1
+    printf '%s\n\n' 'Success! AWS secret key was saved to Vault'
+    exit 0
+}
+
+setup_datadog(){
+    DATADOG_URL=https://app.datadoghq.com/account/settings#api
+    printf "Visit ${DATADOG_URL} to get Datadog API and Application keys\n"
+    printf "Enter Datadog API key and press [ENTER]: "
+    read DATADOG_API
+    printf '\n%s\n' 'Testing authentication with Datadog API...'
+    
+    DATADOG_API_CHECK=$(curl -s "https://app.datadoghq.com/api/v1/validate?api_key=$DATADOG_API")
+    if [[ $DATADOG_API_CHECK =~ \{\"valid\":true\} ]] ; then
+        vault write secret/datadog/app_key app_key=${DATADOG_APP} > /dev/null 2>&1
+        printf '%s\n\n' 'Success! AWS secret key was saved to Vault'
+    else
+        printf '\n%s\n' 'Failed!: Datadog API key is invalid'
+        exit 1
+    fi
+
+    printf "Enter Datadog Application key and press [ENTER]: "
+    read DATADOG_APP
+    vault write secret/datadog/app_key app_key=${DATADOG_APP} > /dev/null 2>&1
+    printf '%s\n\n' 'Success! AWS secret key was saved to Vault'
+    exit 0
+}
+
+usage(){
+	printf "Usage:\n"
+	printf "\t aws\t\t: Gather and store metadata for AWS\n"
+    printf "\t datadog\t: Gather and store metadata for the Datadog service.\n"
+	printf "\t down\t\t: Shutdown Consul-Vault.\n"
+	printf "\t setup\t\t: Setup Consul-Vault systemd template.\n"
+	printf "\t restart\t: Restart Consul-Vault.\n"
+	printf "\t up\t\t: Spin up Consul-Vault.\n"
+	printf "\t help\t\t: Show this help.\n"
+	exit 0
+}
+
+INPUT=$1
+if [[ -z "$INPUT_1" ]]; then
+	usage
+fi
+
+INPUT=$2
+if [[ -z "$INPUT_2" ]]; then
+    ENV="dev"
+fi
+
+case "$INPUT_1" in
+	aws)
+        setup_aws
+        ;;
+    datadog)
+        setup_datadog
+        ;;
+	down)
+		stop_stack "$ENV"
+		;;
+	disable)
+		disable_stack "$ENV"
+		;;
+    init)
+        init_vault
+        ;;
+    shell)
+        sudo docker exec -it \
+            vault sh
+        ;;
+	restart)
+		stop_stack "$ENV"
+		start_stack "$ENV"
+		;;
+    up)
+        start_stack "$ENV"
+        sleep 10
+        init_vault
+        setup_aws
+        ;;
+	* | help)
+		usage
+		;;
+esac

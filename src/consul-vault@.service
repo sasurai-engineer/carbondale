@@ -1,0 +1,24 @@
+[Unit]
+Description=Consul-Vault
+After=docker.service
+
+[Service]
+Restart=always
+EnvironmentFile=/etc/environment
+
+ExecStartPre=/bin/bash -c "mkdir -p /var/tmp/{consul,vault}/data"
+
+ExecStartPre=/bin/bash -c "mkdir -p /workspace/consul_vault"
+
+ExecStartPre=/bin/cp /workspace/provisioner/vagrant/applications/consul_vault/docker-compose.yml.template /workspace/consul_vault/docker-compose.yaml
+
+ExecStartPre=/bin/cp -R /workspace/provisioner/vagrant/applications/consul_vault/consul /workspace/consul_vault/
+
+ExecStartPre=/bin/cp -R /workspace/provisioner/vagrant/applications/consul_vault/vault /workspace/consul_vault/
+
+ExecStart=/bin/bash -c "cd /workspace/consul_vault && /opt/bin/docker-compose up"
+
+ExecStop=/bin/bash -c "cd /workspace/consul_vault && /opt/bin/docker-compose down"
+
+[Install]
+WantedBy=multi-user.target
