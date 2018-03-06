@@ -12,6 +12,10 @@ unseal keys and a root key. The unseal process takes three of the unseal keys
 and feeds them back in to Vault. The keys are then scrubbed and removed from 
 the filesystem.
 
+## Prerequisites
+1. Linux distro w/kernel 4.1+
+2. Docker 17.12+
+
 ## Quickstart
 1. Checkout repo
 2. `cd carbondale`
