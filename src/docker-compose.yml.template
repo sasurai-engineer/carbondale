@@ -6,7 +6,7 @@ services:
     command: agent -server -client 0.0.0.0 -bootstrap-expect=1 -ui -config-dir /consul/config
     image: consul:1.0.2
     volumes:
-      - /workspace/consul_vault/consul/config:/consul/config
+      - /workspace/carbondale/src/consul/config:/consul/config
       - /var/tmp/consul/data:/consul/data
     ports:
       - "8300-8302"
@@ -22,7 +22,7 @@ services:
     hostname: vault
     image: vault:0.9.3
     volumes:
-      - /workspace/consul_vault/vault/config:/vault/config
+      - /workspace/carbondale/src//vault/config:/vault/config
       - /var/tmp/vault/data:/vault/data
     cap_add:
       - IPC_LOCK

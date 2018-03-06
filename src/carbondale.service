@@ -1,0 +1,16 @@
+[Unit]
+Description=Carbondale
+After=docker.service
+
+[Service]
+Restart=always
+EnvironmentFile=/etc/environment
+
+ExecStartPre=/bin/bash -c "mkdir -p /var/tmp/{consul,vault}/data"
+
+ExecStart=/bin/bash -c "cd /workspace/carbondale/src && /opt/bin/docker-compose up"
+
+ExecStop=/bin/bash -c "cd /workspace/carbondale/src && /opt/bin/docker-compose down"
+
+[Install]
+WantedBy=multi-user.target

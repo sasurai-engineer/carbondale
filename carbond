@@ -67,6 +67,7 @@ validate_vault(){
         exit 1
     fi
 }
+
 setup_aws(){
     AWS_USERNAME=$(aws iam get-user|jq -r '.User.UserName')
     CREDENTIALS=${CREDENTIALS:-~/.aws/credentials}
