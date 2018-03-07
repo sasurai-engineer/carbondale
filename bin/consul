@@ -1,0 +1,51 @@
+#!/bin/bash
+
+CONSUL_IP=$(echo $DOCKER_HOST_IP)
+CONSUL_PORT=8500
+CONSUL_CONF=/etc/environment
+IMAGE=hashicorp/consul
+IMAGE_TAG=1.0.2
+
+cat "$CONSUL_CONF" | grep CONSUL_IMAGE > /dev/null 2>&1
+if [[ "$?" == 1 ]];then
+    sudo /bin/bash -c "echo CONSUL_IMAGE=${IMAGE}:${IMAGE_TAG} >> ${CONSUL_CONF}"
+fi
+get_help(){
+    echo "Usage:"
+    printf "\t config\t: Provide Consul container version (e.g. consul config 0.9.9) to override default 'latest'.\n"
+    printf "\t --help\t: Show help from Consul container.\n"
+    printf "\t help\t: Show this help.\n"
+    printf "\t shell\t: Open a shell in the Consul container.\n"
+    printf "\t * \t: Run Consul container if no input passed to 'consul'.\n"
+    exit 0
+}
+
+# param $1 - Image tag
+configure_image_version(){
+    CONSUL_IMAGE_GIVEN_TAG=$1
+    if [[ -z "$CONSUL_IMAGE_GIVEN_TAG" ]];then
+        printf "ERROR: Provide a target CONSUL version (e.g. 0.9.9, latest, etc.) to override the default 'latest' version.\n"
+        exit 1
+    else
+        CUR_TAG=$(cat "$CONSULT_CONF" | grep CONSUL_IMAGE | cut -d ":" -f2)
+        sudo sed -i -e "s/${CUR_TAG}/${CONSUL_IMAGE_GIVEN_TAG}/g" "$CONSUL_CONF"
+    fi
+    CONSUL_IMAGE=$(consul version)
+    printf "Currently configured image tag is: ${CONSUL_IMAGE}.\n"
+}
+
+COMMAND=$1
+if [[ -z "$COMMAND" ]]; then
+    get_help
+fi
+
+case "$COMMAND" in
+    help)
+        get_help
+        ;;
+    *)
+        sudo docker exec \
+            consul \
+            consul "${@:1}"
+        ;;
+esac
