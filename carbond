@@ -29,7 +29,7 @@ disable_stack(){
 }
 
 setup_stack(){
-	sudo /bin/cp /workspace/carbondale/src/carbondale@1.service /etc/systemd/system/
+	sudo /bin/cp /workspace/carbondale/src/carbondale@.service /etc/systemd/system/
 	sudo systemctl daemon-reload
 }
 
@@ -41,12 +41,12 @@ start_stack(){
 }
 
 stop_stack(){
-	echo "Stopping Carbondale...\n"
+	printf "Stopping Carbondale...\n"
 	sudo systemctl stop carbondale@1
 }
 
 restart_stack(){
-	echo "Restarting Carbondale...\n"
+	printf "Restarting Carbondale...\n"
 	sudo systemctl restart carbondale@1
 }
 
@@ -137,7 +137,7 @@ usage(){
 	exit 0
 }
 
-INPUT_!=$1
+INPUT_1=$1
 if [[ -z "$INPUT_1" ]]; then
 	usage
 fi
