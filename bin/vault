@@ -33,24 +33,6 @@ configure_image_version(){
     printf "Currently configured image tag is: ${VAULT_IMAGE}.\n"
 }
 
-setup_vault(){
-    INSTALL_DIR=$1
-    type vault > /dev/null 2>&1
-    if [[ "$?" == "1" ]]; then
-        printf '%s\n' 'Installing Vault...'
-        sudo /bin/cp /workspace/carbondale/src/bin/vault "$INSTALL_DIR"
-    fi
-}
-
-setup_consul(){
-    INSTALL_DIR=$1
-    type consul > /dev/null 2>&1
-    if [[ "$?" == "1" ]]; then
-        printf '%s\n' 'Installing Consul...'
-        sudo /bin/cp /workspace/carbondale/bin/consul "$INSTALL_DIR"
-    fi
-}
-
 COMMAND=$1
 if [[ -z "$COMMAND" ]]; then
     get_help

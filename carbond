@@ -5,6 +5,8 @@ CONSUL_IP=$(cat /etc/environment | grep DOCKER_HOST_IP | cut -d "=" -f2)
 CONSUL_PORT=8500
 CONSUL_API_VERSION=v1
 CONSUL_KV_API=kv
+INSTALL_DIR=/opt/bin/
+
 cfg_parser (){
     IFS=$'\n' && ini=( $(<$1) ) # convert to line-array
     ini=( ${ini[*]//;*/} )      # remove comments ;
@@ -65,6 +67,22 @@ validate_vault(){
     else
     	printf 'Vault is not unsealed.\n\n' 
         exit 1
+    fi
+}
+
+setup_vault(){
+    type vault > /dev/null 2>&1
+    if [[ "$?" == "1" ]]; then
+        printf '%s\n' 'Installing Vault...'
+        sudo /bin/cp /workspace/carbondale/bin/vault "$INSTALL_DIR"
+    fi
+}
+
+setup_consul(){
+    type consul > /dev/null 2>&1
+    if [[ "$?" == "1" ]]; then
+        printf '%s\n' 'Installing Consul...'
+        sudo /bin/cp /workspace/carbondale/bin/consul "$INSTALL_DIR"
     fi
 }
 
@@ -162,6 +180,10 @@ case "$INPUT_1" in
 		;;
     init)
         init_vault
+        ;;
+    setup)
+        setup_vault
+        setup_consul
         ;;
     shell)
         sudo docker exec -it \
