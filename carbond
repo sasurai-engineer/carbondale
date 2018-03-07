@@ -41,12 +41,12 @@ start_stack(){
 }
 
 stop_stack(){
-	echo "Stopping Carbondale...\n"
+	printf "Stopping Carbondale...\n"
 	sudo systemctl stop carbondale@1
 }
 
 restart_stack(){
-	echo "Restarting Carbondale...\n"
+	printf "Restarting Carbondale...\n"
 	sudo systemctl restart carbondale@1
 }
 
