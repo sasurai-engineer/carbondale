@@ -147,10 +147,11 @@ usage(){
 	printf "Usage:\n"
 	printf "\t aws\t\t: Gather and store metadata for AWS\n"
     printf "\t datadog\t: Gather and store metadata for the Datadog service.\n"
-	printf "\t down\t\t: Shutdown Consul-Vault.\n"
-	printf "\t setup\t\t: Setup Consul-Vault systemd template.\n"
-	printf "\t restart\t: Restart Consul-Vault.\n"
-	printf "\t up\t\t: Spin up Consul-Vault.\n"
+	printf "\t down\t\t: Shutdown Carbondale.\n"
+	printf "\t setup\t\t: Setup up Consul and Vault CLI.\n"
+    printf "\t shell\t\t: Open up shell to Vault Docker container.\n"
+	printf "\t restart\t: Restart Carbondale.\n"
+	printf "\t up\t\t: Spin up Carbondale.\n"
 	printf "\t help\t\t: Show this help.\n"
 	exit 0
 }
