@@ -29,7 +29,7 @@ disable_stack(){
 }
 
 setup_stack(){
-	sudo /bin/cp /workspace/carbondale/src/carbondale@1.service /etc/systemd/system/
+	sudo /bin/cp /workspace/carbondale/src/carbondale@.service /etc/systemd/system/
 	sudo systemctl daemon-reload
 }
 
@@ -137,7 +137,7 @@ usage(){
 	exit 0
 }
 
-INPUT_!=$1
+INPUT_1=$1
 if [[ -z "$INPUT_1" ]]; then
 	usage
 fi
