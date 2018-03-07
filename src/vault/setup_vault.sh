@@ -111,7 +111,9 @@ vault_set_addr(){
 
 vault_set_addr
 vault_init
+sleep 2
 scrub_creds
 vault_unseal
+sleep 2
 vault_login
 output

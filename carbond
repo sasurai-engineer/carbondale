@@ -137,12 +137,12 @@ usage(){
 	exit 0
 }
 
-INPUT=$1
+INPUT_!=$1
 if [[ -z "$INPUT_1" ]]; then
 	usage
 fi
 
-INPUT=$2
+INPUT_2=$2
 if [[ -z "$INPUT_2" ]]; then
     ENV="dev"
 fi
@@ -175,7 +175,6 @@ case "$INPUT_1" in
         start_stack "$ENV"
         sleep 10
         init_vault
-        setup_aws
         ;;
 	* | help)
 		usage
