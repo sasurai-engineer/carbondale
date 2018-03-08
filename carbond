@@ -150,6 +150,7 @@ usage(){
 	printf "\t down\t\t: Shutdown Carbondale.\n"
 	printf "\t setup\t\t: Setup up Consul and Vault CLI.\n"
     printf "\t shell\t\t: Open up shell to Vault Docker container.\n"
+    printf "\t status\t\t: Provides status for Consul and Vault.\n"
 	printf "\t restart\t: Restart Carbondale.\n"
 	printf "\t up\t\t: Spin up Carbondale.\n"
 	printf "\t help\t\t: Show this help.\n"
@@ -190,6 +191,13 @@ case "$INPUT_1" in
         sudo docker exec -it \
             vault sh
         ;;
+    status)
+        setup_vault
+        setup_consul
+        vault status
+        consul status
+        ;;
+
 	restart)
 		stop_stack "$ENV"
 		start_stack "$ENV"
