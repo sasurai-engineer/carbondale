@@ -42,10 +42,13 @@ vault_init() {
         COUNTER=1
         vault operator init &> /tmp/vault.init || true
 
+        sleep 2
         cat /tmp/vault.init | tr -d '\r' | grep 'Unseal' | awk '{print $4}' | for key in $(cat -); do
             curl -fX PUT ${CONSUL_IP}:${CONSUL_PORT}/${CONSUL_API_VERSION}/${CONSUL_KV_API}/${VAULT_KV}/unseal-key-${COUNTER} -d "$key" > /dev/null 2>&1
             COUNTER=$((COUNTER + 1))
         done
+
+        sleep 2
         printf '\n%s\n' "Vault has been initialized!"
 
         ROOT_TOKEN=$(cat /tmp/vault.init | tr -d '\r' | grep 'Initial' | awk '{print $4}')
@@ -71,8 +74,11 @@ vault_unseal() {
     printf '\n%s\n' "Unsealing Vault..."
     if [ "${SEAL_STATUS}" != 'false' ];then
         curl -X PUT ${VAULT_IP}:${VAULT_PORT}/${VAULT_API_VERSION}/${UNSEAL_API} -d '{"key":"'$(cget unseal-key-1)'"}' > /dev/null 2>&1
+        sleep 1
         curl -X PUT ${VAULT_IP}:${VAULT_PORT}/${VAULT_API_VERSION}/${UNSEAL_API} -d '{"key":"'$(cget unseal-key-2)'"}' > /dev/null 2>&1
+        sleep 1
         curl -X PUT ${VAULT_IP}:${VAULT_PORT}/${VAULT_API_VERSION}/${UNSEAL_API} -d '{"key":"'$(cget unseal-key-3)'"}' > /dev/null 2>&1
+        sleep 1
         printf '\n%s\n' "Vault setup complete!"
         return
     fi
@@ -84,7 +90,8 @@ vault_login(){
     VAULT_TOKEN="$(cget root-token)"
     printf '\n%s\n' "Logging in to Vault..."
     vault login "$VAULT_TOKEN"
-
+    sleep 2
+    
     CUR_TOKEN=$(cat $VAULT_ENV | grep VAULT_TOKEN | cut -d "=" -f2)
     printf '\n%s\n' "Setting up Vault token..."
     if [[ -z "$CUR_TOKEN" ]];then
