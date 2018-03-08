@@ -40,6 +40,7 @@ start_stack(){
 	printf "Starting Carbondale...\n"
 	sudo systemctl enable carbondale@1 > /dev/null 2>&1
 	sudo systemctl start carbondale@1
+    sleep 15
 }
 
 stop_stack(){
@@ -197,14 +198,12 @@ case "$INPUT_1" in
         vault status
         consul info
         ;;
-
 	restart)
 		stop_stack "$ENV"
 		start_stack "$ENV"
 		;;
     up)
         start_stack "$ENV"
-        sleep 10
         init_vault
         ;;
 	* | help)
