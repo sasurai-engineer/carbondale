@@ -195,7 +195,7 @@ case "$INPUT_1" in
         setup_vault
         setup_consul
         vault status
-        consul status
+        consul info
         ;;
 
 	restart)
