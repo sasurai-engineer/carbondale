@@ -8,7 +8,7 @@ CONSUL_API_VERSION=v1
 CONSUL_KV_API=kv
 @test "CARBONDALE: Provisioning and destruction of Consul and Vault is working." {
     TOKEN=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 6 | head -n 1)
-    run vnl vault up
+    run ./carbondale up
     assert_success
 
     run curl -fX PUT ${CONSUL_IP}:${CONSUL_PORT}/${CONSUL_API_VERSION}/${CONSUL_KV_API}/testing/token -d $TOKEN
@@ -45,6 +45,6 @@ CONSUL_KV_API=kv
     run vault read secret/testing/token"
     [ "$status" -eq 2 ]
 
-    run vnl vault down
+    run ./carbondale down
     assert_success
 }
