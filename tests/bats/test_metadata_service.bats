@@ -6,6 +6,8 @@ CONSUL_IP=$(cat /etc/environment | grep DOCKER_HOST_IP | cut -d "=" -f2)
 CONSUL_PORT=8500
 CONSUL_API_VERSION=v1
 CONSUL_KV_API=kv
+CONSUL_HEALTH_API=health/state/passing
+
 @test "CARBONDALE: Provisioning and destruction of Consul and Vault is working." {
     TOKEN=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 6 | head -n 1)
     run ./carbondale up
