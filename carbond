@@ -30,7 +30,6 @@ login_remote_vault(){
     VAULT_URL=$1
     AWS_ACCOUNT_NUMBER=$2
     ROLE=$3
-    OPTIONS=$4
     if [[ -z $ROLE ]]; then
         printf "Please provide the AWS EC2 instance profile name of the instance running Carbondale.\n"
     elif [[ -z $AWS_ACCOUNT_NUMBER ]]; then
@@ -40,10 +39,9 @@ login_remote_vault(){
     fi
 
     curl -vk \
-        $OPTIONS \
         https://$VAULT_URL/v1/auth/ec2-$AWS_ACCOUNT_NUMBER/login \
         -X POST \
-        -d '{“role”: "$ROLE", “pkcs7”:"'$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')'"}'
+        -d '{"role": "$ROLE", "pkcs7":"'$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')'"}'
 }
 
 read_vault_kvp(){
@@ -313,8 +311,7 @@ case "$INPUT_1" in
         VAULT_URL="$INPUT_2"
         AWS_ACCOUNT_NUMBER="$INPUT_3"
         ROLE="$INPUT_4"
-        OPTIONS="$INPUT_5"
-        login_remote_vault "$AWS_ACCOUNT_NUMBER" "$ROLE" "$OPTIONS"
+        login_remote_vault "$VAULT_URL" "$AWS_ACCOUNT_NUMBER" "$ROLE"
         ;;
     setup)
         setup_vault
@@ -331,7 +328,10 @@ case "$INPUT_1" in
         consul info
         ;;
     read)
-        read_vault_kvp "$2" "$3" "$4"
+        VAULT_TOKEN="$INPUT_2"
+        VAULT_URL="$INPUT_3"
+        VAULT_DIR="$INPUT_4"
+        read_vault_kvp "$VAULT_TOKEN" "$VAULT_URL" "$VAULT_DIR"
         ;;
 	restart)
 		stop_stack
