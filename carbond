@@ -31,7 +31,7 @@ login_remote_vault(){
     AWS_ACCOUNT_NUMBER=$2
     ROLE=$3
     OPTIONS=$4
-    if [[ -z $ROLE ]]
+    if [[ -z $ROLE ]]; then
         printf "Please provide the AWS EC2 instance profile name of the instance running Carbondale.\n"
     elif [[ -z $AWS_ACCOUNT_NUMBER ]]; then
         printf "Please provide the AWS account number from the account used to deploy Vault.\n"
@@ -51,7 +51,7 @@ read_vault_kvp(){
     VAULT_URL=$2
     VAULT_DIR=$3
     KEY=$4
-    if [[ -z $VAULT_TOKEN ]]
+    if [[ -z $VAULT_TOKEN ]]; then
         printf "Please provide a Vault token.\n"
     elif [[ -z $VAULT_URL ]]; then
         printf "Please provide the AWS account number from the account used to deploy Vault.\n"
@@ -75,7 +75,7 @@ write_vault_kvp(){
     VAULT_DIR=$3
     KEY=$4
     KEY_VALUE=$5
-    if [[ -z $VAULT_TOKEN ]]
+    if [[ -z $VAULT_TOKEN ]]; then
         printf "Please provide a Vault token.\n"
     elif [[ -z $VAULT_URL ]]; then
         printf "Please provide the AWS account number from the account used to deploy Vault.\n"
@@ -97,14 +97,14 @@ delete_vault_kvp(){
     VAULT_TOKEN=$1
     VAULT_URL=$2
     VAULT_DIR=$3
-    KEY=$4
-    if [[ -z $VAULT_TOKEN ]]
+    VAULT_KEY=$4
+    if [[ -z $VAULT_TOKEN ]]; then
         printf "Please provide a Vault token.\n"
     elif [[ -z $VAULT_URL ]]; then
         printf "Please provide the AWS account number from the account used to deploy Vault.\n"
     elif [[ -z $VAULT_DIR ]]; then
         printf "Please provide the directory of the key to read from Vault.\n"
-    elif [[ -z $KEY ]]; then
+    elif [[ -z $VAULT_KEY ]]; then
         printf "Please provide the key to read from Vault.\n"
     fi
 
@@ -118,7 +118,7 @@ list_vault_kvp(){
     VAULT_TOKEN=$1
     VAULT_URL=$2
     VAULT_DIR=$3
-    if [[ -z $VAULT_TOKEN ]]
+    if [[ -z $VAULT_TOKEN ]]; then
         printf "Please provide a Vault token.\n"
     elif [[ -z $VAULT_URL ]]; then
         printf "Please provide the AWS account number from the account used to deploy Vault.\n"
@@ -275,6 +275,11 @@ if [[ -z "$INPUT_1" ]]; then
 	usage
 fi
 
+INPUT_2=$3
+INPUT_3=$4
+INPUT_4=$5
+INPUT_5=$6
+
 case "$INPUT_1" in
 	aws)
         setup_aws
@@ -283,7 +288,11 @@ case "$INPUT_1" in
         setup_datadog
         ;;
     delete)
-        delete_vault_kvp "$2" "$3" "$4"
+        VAULT_TOKEN="INPUT_2"
+        VAULT_URL="INPUT_3"
+        VAULT_DIR="INPUT_4"
+        VAULT_KEY="INPUT_5"
+        delete_vault_kvp "$VAULT_TOKEN" "$VAULT_URL" "$VAULT_DIR" "$VAULT_KEY"
         ;;
 	down)
 		stop_stack
@@ -295,10 +304,17 @@ case "$INPUT_1" in
         init_vault
         ;;
     list)
-        list_vault_kvp "$2" "$3" "$4"
+        VAULT_TOKEN="INPUT_2"
+        VAULT_URL="INPUT_3"
+        VAULT_DIR="INPUT_4"
+        list_vault_kvp "$VAULT_TOKEN" "$VAULT_URL" "$VAULT_DIR"
         ;;
     login)
-        login_remote_vault "$2" "$3" "$4" "$5"
+        VAULT_URL="$INPUT_2"
+        AWS_ACCOUNT_NUMBER="$INPUT_3"
+        ROLE="$INPUT_4"
+        OPTIONS="$INPUT_5"
+        login_remote_vault "$AWS_ACCOUNT_NUMBER" "$ROLE" "$OPTIONS"
         ;;
     setup)
         setup_vault
