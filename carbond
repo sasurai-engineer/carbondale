@@ -27,10 +27,17 @@ cfg_parser (){
 }
 
 login_remote_vault(){
-    ROLE=$1
+    VAULT_URL=$1
     AWS_ACCOUNT_NUMBER=$2
-    VAULT_URL=$3
+    ROLE=$3
     OPTIONS=$4
+    if [[ -z $ROLE ]]
+        printf "Please provide the AWS EC2 instance profile name of the instance running Carbondale.\n"
+    elif [[ -z $AWS_ACCOUNT_NUMBER ]]; then
+        printf "Please provide the AWS account number from the account used to deploy Vault.\n"
+    elif [[ -z $VAULT__URL ]]; then
+        printf "Please provide the Vault URL.\n"
+    fi
 
     curl -vk \
         $OPTIONS \
@@ -40,24 +47,45 @@ login_remote_vault(){
 }
 
 read_vault_kvp(){
-    VAULT_URL=$1
-    VAULT_TOKEN=$2
+    VAULT_TOKEN=$1
+    VAULT_URL=$2
     VAULT_DIR=$3
     KEY=$4
-    KEY_VALUE=$5
+    if [[ -z $VAULT_TOKEN ]]
+        printf "Please provide a Vault token.\n"
+    elif [[ -z $VAULT_URL ]]; then
+        printf "Please provide the AWS account number from the account used to deploy Vault.\n"
+    elif [[ -z $VAULT_DIR ]]; then
+        printf "Please provide the directory of the key to read from Vault.\n"
+    elif [[ -z $KEY ]]; then
+        printf "Please provide the key to read from Vault.\n"
+    elif [[ -z $KEY_VALUE ]]; then
+        printf "Please provide the key to read from Vault.\n"
+    fi
 
     curl \
     -H "X-Vault-Token: $VAULT_TOKEN" \
     -X GET \
-    /v1/$VAULT_DIR/$KEY $KEY_VALUE
+    /v1/$VAULT_DIR/$KEY
 }
 
 write_vault_kvp(){
-    VAULT_URL=$1
-    VAULT_TOKEN=$2
+    VAULT_TOKEN=$1
+    VAULT_URL=$2
     VAULT_DIR=$3
     KEY=$4
     KEY_VALUE=$5
+    if [[ -z $VAULT_TOKEN ]]
+        printf "Please provide a Vault token.\n"
+    elif [[ -z $VAULT_URL ]]; then
+        printf "Please provide the AWS account number from the account used to deploy Vault.\n"
+    elif [[ -z $VAULT_DIR ]]; then
+        printf "Please provide the directory of the key to read from Vault.\n"
+    elif [[ -z $KEY ]]; then
+        printf "Please provide the key to read from Vault.\n"
+    elif [[ -z $KEY_VALUE ]]; then
+        printf "Please provide the key to read from Vault.\n"
+    fi
 
     curl \
     -H "X-Vault-Token: $VAULT_TOKEN" \
@@ -66,10 +94,19 @@ write_vault_kvp(){
 }
 
 delete_vault_kvp(){
-    VAULT_URL=$1
-    VAULT_TOKEN=$2
+    VAULT_TOKEN=$1
+    VAULT_URL=$2
     VAULT_DIR=$3
     KEY=$4
+    if [[ -z $VAULT_TOKEN ]]
+        printf "Please provide a Vault token.\n"
+    elif [[ -z $VAULT_URL ]]; then
+        printf "Please provide the AWS account number from the account used to deploy Vault.\n"
+    elif [[ -z $VAULT_DIR ]]; then
+        printf "Please provide the directory of the key to read from Vault.\n"
+    elif [[ -z $KEY ]]; then
+        printf "Please provide the key to read from Vault.\n"
+    fi
 
     curl \
     -H "X-Vault-Token: $VAULT_TOKEN" \
@@ -78,9 +115,16 @@ delete_vault_kvp(){
 }
 
 list_vault_kvp(){
-    VAULT_URL=$1
-    VAULT_TOKEN=$2
+    VAULT_TOKEN=$1
+    VAULT_URL=$2
     VAULT_DIR=$3
+    if [[ -z $VAULT_TOKEN ]]
+        printf "Please provide a Vault token.\n"
+    elif [[ -z $VAULT_URL ]]; then
+        printf "Please provide the AWS account number from the account used to deploy Vault.\n"
+    elif [[ -z $VAULT_DIR ]]; then
+        printf "Please provide the directory of the key to read from Vault.\n"
+    fi
 
     curl \
     -H "X-Vault-Token: $VAULT_TOKEN" \
@@ -213,15 +257,15 @@ usage(){
     printf "\t delete\t\t: Deletes a key-value pair from Vault. (e.g. vnl vault delete <vault_url> <vault_token> <vault_dir> <key>)\n"
 	printf "\t down\t\t: Shutdown Carbondale.\n"
     printf "\t init\t\t: Runs initialization and unseal process for Vault\n"
-    printf "\t list\t\t: List key-value pairs in specified Vault directory. (e.g. vnl vault list <vault_url> <vault_token> <vault_dir>)\n"
-    printf "\t login\t\t: Login to Vault. (e.g. vnl vault login <role> <aws_account_nunber> <vault_url> <proxy_options>)\n"
+    printf "\t list\t\t: List key-value pairs in specified Vault directory. (e.g. vnl vault list <vault_token> <vault_url> <vault_dir>)\n"
+    printf "\t login\t\t: Login to Vault. (e.g. vnl vault login <vault_url> <aws_account_nunber> <role> <proxy_options>)\n"
 	printf "\t setup\t\t: Setup up Consul and Vault CLI.\n"
     printf "\t shell\t\t: Open up shell to Vault Docker container.\n"
     printf "\t status\t\t: Provides status for Consul and Vault.\n"
-    printf "\t read\t\t: Reads a key-value pair from Vault. (e.g. vnl vault read <vault_url> <vault_token> <vault_dir> <key> <key_value>)\n"
+    printf "\t read\t\t: Reads a key-value pair from Vault. (e.g. vnl vault read <vault_token> <vault_url> <vault_dir> <key>)\n"
 	printf "\t restart\t: Restart Carbondale.\n"
 	printf "\t up\t\t: Spin up Carbondale.\n"
-    printf "\t write\t\t: Writes a key-value pair from Vault. (e.g. vnl vault write <vault_url> <vault_token> <vault_dir> <key> <key_value>)\n"
+    printf "\t write\t\t: Writes a key-value pair from Vault. (e.g. vnl vault write <vault_token> <vault_url> <vault_dir> <key> <key_value>)\n"
 	printf "\t help\t\t: Show this help.\n"
 	exit 0
 }
@@ -253,7 +297,7 @@ case "$INPUT_1" in
     list)
         list_vault_kvp "$2" "$3" "$4"
         ;;
-    login
+    login)
         login_remote_vault "$2" "$3" "$4" "$5"
         ;;
     setup)
@@ -271,7 +315,7 @@ case "$INPUT_1" in
         consul info
         ;;
     read)
-        read_vault_kvp "$2" "$3" "$4" "5"
+        read_vault_kvp "$2" "$3" "$4"
         ;;
 	restart)
 		stop_stack
@@ -282,7 +326,7 @@ case "$INPUT_1" in
         init_vault
         ;;
     write)
-        write_vault_kvp "$2" "$3" "$4" "$5"
+        write_vault_kvp "$2" "$3" "$4" "$5" "$6"
         ;;
 	* | help)
 		usage
