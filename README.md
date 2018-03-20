@@ -4,13 +4,12 @@ Carbondale is a cli tool that initializes and unseals Vault for development use.
 ## Overview
 Vault secures, stores and controls access to tokens, passwords, certificates, 
 API keys, and other secrets. Carbondale is an abstraction layer to Vault that
-automates the provisioning of Vault.
+automates the provisioning of Vault using Consul.
 
-Vault requires that it be initialized and unsealed you are able to save key-value
-pairs. The initialization process involves generated a set number of
-unseal keys and a root key. The unseal process takes three of the unseal keys 
-and feeds them back in to Vault. The keys are then scrubbed and removed from 
-the filesystem.
+Vault requires that it be initialized and unsealed before you are able to save key-value
+pairs. The initialization process generates a set number of unseal keys and a root key. 
+The unseal process takes three of the unseal keys and feeds them back in to Vault.
+The keys are then scrubbed and removed from the filesystem.
 
 ## Prerequisites
 1. Linux distro w/kernel 4.1+
