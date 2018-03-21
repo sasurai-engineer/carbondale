@@ -42,10 +42,6 @@ vault_init() {
         COUNTER=1
         vault operator init &> /tmp/vault.init || true
 
-        if [[ grep /tmp/vault 400 ]] ;then
-            rm -rf /tmp/vault
-        fi
-
         sleep 2
         cat /tmp/vault.init | tr -d '\r' | grep 'Unseal' | awk '{print $4}' | for key in $(cat -); do
             curl -fX PUT ${CONSUL_IP}:${CONSUL_PORT}/${CONSUL_API_VERSION}/${CONSUL_KV_API}/${VAULT_KV}/unseal-key-${COUNTER} -d "$key" > /dev/null 2>&1
