@@ -1,7 +1,7 @@
 #!/bin/bash
 set +e
 
-CONSUL_IP=$(cat /etc/environment | grep DOCKER_HOST_IP | cut -d "=" -f2)
+CONSUL_IP=$(ip route get 1 | awk '{print $7;exit}')
 CONSUL_PORT=8500
 CONSUL_API_VERSION=v1
 CONSUL_KV_API=kv
@@ -41,6 +41,10 @@ vault_init() {
         printf '\n%s\n' "Storing Vault keys..."
         COUNTER=1
         vault operator init &> /tmp/vault.init || true
+
+        if [[ grep /tmp/vault 400 ]] ;then
+            rm -rf /tmp/vault
+        fi
 
         sleep 2
         cat /tmp/vault.init | tr -d '\r' | grep 'Unseal' | awk '{print $4}' | for key in $(cat -); do
