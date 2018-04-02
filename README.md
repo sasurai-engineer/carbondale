@@ -12,13 +12,14 @@ The unseal process takes three of the unseal keys and feeds them back in to Vaul
 The keys are then scrubbed and removed from the filesystem.
 
 ## Prerequisites
-1. Linux distro w/kernel 4.1+
+1. Linux distro w/kernel 4.1+ with `systemd` as the init system
 2. Docker 17.12+
 
 ## Quickstart
 1. Checkout repo
 2. `cd carbondale`
 3. `carbond up`
+4. `carbond help`
 
 ## Development
 The development deployment for Carbodale deploys a two docker containers; Vault
